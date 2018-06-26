@@ -5,47 +5,58 @@ defmodule ExchemaJSON do
 
   alias ExchemaJSON.JSON
 
-  def encode(nil), do: nil
+  def encode(value, overrides \\ &(&1)) do
+    case overrides.(value) do
+      fun when is_function(fun, 1) ->
+        fun.(value)
+      _ ->
+        do_encode(value, overrides)
+    end
+  end
 
-  def encode(input) when is_atom(input),
+  defp do_encode(nil, overrides), do: nil
+
+  defp do_encode(input, overrides) when is_atom(input),
     do: to_string(input)
 
-  def encode(input) when is_number(input) or is_binary(input),
+  defp do_encode(input, overrides) when is_number(input) or is_binary(input),
     do: input
 
-  def encode(%mod{} = input)
+  defp do_encode(%mod{} = input, overrides)
       when mod in [DateTime, NaiveDateTime, Time, Date],
       do: mod.to_iso8601(input)
 
-  def encode(%mod{} = input) do
+  defp do_encode(%mod{} = input, overrides) do
     input
     |> Map.from_struct()
-    |> encode()
+    |> encode(overrides)
   end
 
-  def encode(%{} = input) do
+  defp do_encode(%{} = input, overrides) do
     input
     |> Map.to_list()
-    |> Enum.map(fn {k, v} -> {to_string(k), encode(v)} end)
+    |> Enum.map(fn {k, v} -> {to_string(k), encode(v, overrides)} end)
     |> Enum.into(%{})
   end
 
-  def encode(input) when is_list(input) do
+  defp do_encode(input, overrides) when is_list(input) do
     if Keyword.keyword?(input) and input != [] do
       input
       |> Enum.into(%{})
-      |> encode()
+      |> encode(overrides)
     else
       input
       |> Enum.map(&encode/1)
     end
   end
 
-  def encode(input) when is_tuple(input) do
+  defp do_encode(input, overrides) when is_tuple(input) do
     input
     |> Tuple.to_list()
-    |> encode()
+    |> encode(overrides)
   end
+
+  defp do_encode(input, _), do: input
 
   defmodule JSON do
     import Exchema.Notation

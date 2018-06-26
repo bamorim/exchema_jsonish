@@ -30,6 +30,10 @@ defmodule ExchemaJSONTest do
 
   subtype(Structures, {T.OneStructOf, [MyStructure, Simple]}, [])
   subtype(Value, {T.OneOf, [MyAtom, MyList, Structures]}, [])
+  structure(StructureWithDateTime, [
+    datetime: T.DateTime
+  ])
+
   x = %{"map" => %{"a" => "a"}}
   ExchemaCoercion.coerce(x, Simple)
 
@@ -42,7 +46,7 @@ defmodule ExchemaJSONTest do
     end
   end
 
-  property "we can bring it back to the struct" do
+  property "we can bring it back to the struct when using default encodings and coercions" do
     check all value <- ExchemaStreamData.gen(Value) do
       errors =
         value
@@ -54,8 +58,20 @@ defmodule ExchemaJSONTest do
     end
   end
 
-  def debug(value, key) do
-    IO.inspect({key, value})
-    value
+  describe "overriding encoding behaviour" do
+    test "representing datetimes as integers" do
+      struct = %StructureWithDateTime{datetime: DateTime.from_unix!(1000)}
+      encoded = ExchemaJSON.encode(
+        struct,
+        fn 
+          %DateTime{} -> &DateTime.to_unix/1
+          _ -> nil
+        end
+      )
+
+      assert %{"datetime" => 1000} = encoded
+
+      assert struct == ExchemaCoercion.coerce(encoded, StructureWithDateTime)
+    end
   end
 end
