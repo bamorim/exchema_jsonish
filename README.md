@@ -166,4 +166,4 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/exchema_json](https://hexdocs.pm/exchema_json).
 
-[exchema-coercion]: https://github.com/bamorim/exchema-coercion
+[exchema-coercion]: https://github.com/bamorim/exchema_coercion
