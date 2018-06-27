@@ -22,7 +22,7 @@ defmodule ExchemaJSONish.MixProject do
   defp deps do
     [
       {:exchema, "~> 0.3.0"},
-      {:exchema_coercion, github: "bamorim/exchema_coercion"},
+      {:exchema_coercion, github: "bamorim/exchema_coercion", only: [:test]},
       {:exchema_stream_data, github: "bamorim/exchema_stream_data", only: [:test]},
       {:stream_data, "~> 0.4.2"}
     ]
