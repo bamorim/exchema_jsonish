@@ -1,9 +1,9 @@
-defmodule ExchemaJSON do
+defmodule ExchemaJSONish do
   @moduledoc """
-  Documentation for ExchemaJSON.
+  Documentation for ExchemaJSONish.
   """
 
-  alias ExchemaJSON.JSON
+  alias ExchemaJSONish.JSONish
 
   def encode(value, overrides \\ &(&1)) do
     case overrides.(value) do
@@ -58,12 +58,12 @@ defmodule ExchemaJSON do
 
   defp do_encode(input, _), do: input
 
-  defmodule JSON do
+  defmodule JSONish do
     import Exchema.Notation
     alias Exchema.Types, as: T
-    alias __MODULE__, as: JSON
-    subtype(Object, {T.Map, {T.String, JSON}}, [])
-    subtype(List, {T.List, JSON}, [])
+    alias __MODULE__, as: JSONish
+    subtype(Object, {T.Map, {T.String, JSONish}}, [])
+    subtype(List, {T.List, JSONish}, [])
     subtype(Nil, T.Atom, [{{Exchema.Predicates, :inclusion}, [nil]}])
     subtype(Value, {T.OneOf, [T.Number, T.String, Object, List, Nil]}, [])
     subtype({T.Optional, Value}, [])

@@ -1,7 +1,21 @@
-# ExchemaJSON
+# ExchemaJSONish
 
-Exchema JSON provides a JSON Representation that is useful
-for Serializing/Deserializing when used in conjunction with exchema_coercion.
+Exchema JSONish provides a JSON-like Representation that is useful for Serialization/Deserialization
+when used in conjunction with [ExchemaCoercion][exchema-coercion].
+
+Why JSONish? Because the idea here is not to encode something to JSON, but instead to a intermediary
+representation that is like JSON, but you could use to encode it to Messagepack, Avro, JSON, JSONB,
+etc.
+
+The idea is that JSONish is a datatype in Elixir that contains only the accepted types in JSON, that
+is, a JSONish object can be either a string, a number, a map from string to JSONish or a list of
+JSONish objects.
+
+With this library you can encode all default Exchema types to that JSONish representation and then
+you could use any encoder to transform it to a wire format.
+
+That is also an Exchema Type that you can use to check if some value follows the JSONish
+requirements.
 
 ## Basic Usage
 
@@ -40,7 +54,7 @@ my_structure = %MyStructure{
   recursion: nil
 }
 
-my_encoded_structure = my_structure |> ExchemaJSON.encode()
+my_encoded_structure = my_structure |> ExchemaJSONish.encode()
 %{
   "atom" => "my_atom",
   "boolean" => "true",
@@ -57,20 +71,21 @@ my_encoded_structure = my_structure |> ExchemaJSON.encode()
 }
 ```
 
-### Checking if some map is a valid JSON type
+### Checking if some map is a valid JSONish type
 
 ```elixir
-my_encoded_structure |> Exchema.is?(ExchemaJSON.JSON) # true
-%{"key": {:tuple, :here}} |> Exchema.is?(ExchemaJSON.JSON) # false
+my_encoded_structure |> Exchema.is?(ExchemaJSONish.JSONish) # true
+%{"key": {:tuple, :here}} |> Exchema.is?(ExchemaJSONish.JSONish) # false
 ```
 
 ### Getting back to original
 
-The idea is to use [`ExchemaCoercion`][exchema-coercion] to do that, so if your encoding have a
-compatible coercion, everything should do ok.
-I did my best to make all encodings here match the default coercions on [`ExchemaCoercion`][exchema-coercion].
+The idea is to use [ExchemaCoercion][exchema-coercion] to do that, so if your encoding have a
+compatible coercion, everything should do ok. I did my best to make all encodings here match the
+default coercions on [ExchemaCoercion][exchema-coercion].
 
-However, if you override those you may run into trouble (so probably do property testing is a good idea)
+However, if you override those you may run into trouble (so probably do property testing is a good
+idea)
 
 ```elixir
 my_encoded_structure |> ExchemaCoercion.coerce(MyStructure)
@@ -92,12 +107,12 @@ my_encoded_structure |> ExchemaCoercion.coerce(MyStructure)
 
 ### Overriding encodings
 
-For now, instead of using protocols, I just enable you to pass a function that
-returns an encoding function or nil if you don't want to override.
+For now, instead of using protocols, I just enable you to pass a function that returns an encoding
+function or nil if you don't want to override.
 
-This is more general than a protocol since you can specify a override for a very
-specific value and simpler. Maybe I'll change to a protocol later.
-This is also useful if you want to use another encoding library.
+This is more general than a protocol since you can specify a override for a very specific value and
+simpler. Maybe I'll change to a protocol later. This is also useful if you want to use another
+encoding library.
 
 ```elixir
 my_overrides = fn
@@ -105,7 +120,7 @@ my_overrides = fn
   _ -> nil
 end
 
-my_overriden_encoded_structure = my_structure |> ExchemaJSON.encode(my_overrides)
+my_overriden_encoded_structure = my_structure |> ExchemaJSONish.encode(my_overrides)
 %{
   "atom" => "my_atom",
   "boolean" => "true",
@@ -122,10 +137,10 @@ my_overriden_encoded_structure = my_structure |> ExchemaJSON.encode(my_overrides
 }
 ```
 
-And since [`ExchemaCoercion`][exchema-coercion] already has a integer -> DateTime coercion using
+And since [ExchemaCoercion][exchema-coercion] already has a integer -> DateTime coercion using
 from_unix, if you are using the defaults, you will not have any problems.
 
-```
+```elixir
 my_overriden_encoded_structure |> ExchemaCoercion.coerce(MyStructure)
 %MyStructure{
   atom: :my_atom,
@@ -145,25 +160,20 @@ my_overriden_encoded_structure |> ExchemaCoercion.coerce(MyStructure)
 
 #### When to override
 
-In general, It is useful to override when you have different types in a `OneOf`, and then sometimes you'll
-want to encode with some special `type` field, so it serializes in a more explicit way.
-However, you'll need to provide the appropriate coercion to [`ExchemaCoercion`][exchema-coercion]
+In general, It is useful to override when you have different types in a `OneOf`, and then sometimes
+you'll want to encode with some special `type` field, so it serializes in a more explicit way.
+However, you'll need to provide the appropriate coercion to [ExchemaCoercion][exchema-coercion]
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `exchema_json` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `exchema_jsonish` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:exchema_json, "~> 0.1.0"}
+    {:exchema_jsonish, "~> 0.1.0"}
   ]
 end
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/exchema_json](https://hexdocs.pm/exchema_json).
 
 [exchema-coercion]: https://github.com/bamorim/exchema_coercion

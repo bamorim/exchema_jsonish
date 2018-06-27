@@ -1,4 +1,4 @@
-defmodule ExchemaJSONTest do
+defmodule ExchemaJSONishTest do
   use ExUnit.Case, async: false
   use ExUnitProperties
 
@@ -37,11 +37,11 @@ defmodule ExchemaJSONTest do
   x = %{"map" => %{"a" => "a"}}
   ExchemaCoercion.coerce(x, Simple)
 
-  property "we can coerce to valid JSON all default Exchema Types" do
+  property "we can coerce to valid JSONish all default Exchema Types" do
     check all value <- ExchemaStreamData.gen(Value) do
       value
-      |> ExchemaJSON.encode()
-      |> Exchema.is?(ExchemaJSON.JSON)
+      |> ExchemaJSONish.encode()
+      |> Exchema.is?(ExchemaJSONish.JSONish)
       |> assert()
     end
   end
@@ -50,7 +50,7 @@ defmodule ExchemaJSONTest do
     check all value <- ExchemaStreamData.gen(Value) do
       errors =
         value
-        |> ExchemaJSON.encode()
+        |> ExchemaJSONish.encode()
         |> ExchemaCoercion.coerce(Value)
         |> Exchema.errors(Value)
 
@@ -61,9 +61,9 @@ defmodule ExchemaJSONTest do
   describe "overriding encoding behaviour" do
     test "representing datetimes as integers" do
       struct = %StructureWithDateTime{datetime: DateTime.from_unix!(1000)}
-      encoded = ExchemaJSON.encode(
+      encoded = ExchemaJSONish.encode(
         struct,
-        fn 
+        fn
           %DateTime{} -> &DateTime.to_unix/1
           _ -> nil
         end
