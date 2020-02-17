@@ -14,19 +14,19 @@ defmodule ExchemaJSONish do
     end
   end
 
-  defp do_encode(nil, overrides), do: nil
+  defp do_encode(nil, _overrides), do: nil
 
-  defp do_encode(input, overrides) when is_atom(input),
+  defp do_encode(input, _overrides) when is_atom(input),
     do: to_string(input)
 
-  defp do_encode(input, overrides) when is_number(input) or is_binary(input),
+  defp do_encode(input, _overrides) when is_number(input) or is_binary(input),
     do: input
 
-  defp do_encode(%mod{} = input, overrides)
+  defp do_encode(%mod{} = input, _overrides)
       when mod in [DateTime, NaiveDateTime, Time, Date],
       do: mod.to_iso8601(input)
 
-  defp do_encode(%mod{} = input, overrides) do
+  defp do_encode(%_mod{} = input, overrides) do
     input
     |> Map.from_struct()
     |> encode(overrides)
